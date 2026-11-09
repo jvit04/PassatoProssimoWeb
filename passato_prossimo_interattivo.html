@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impara il Passato Prossimo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f0fdf4; /* Soft mint green background */
+            color: #1f2937;
+        }
+        .fade-in {
+            animation: fadeIn 0.4s ease-in-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .btn-option {
+            transition: all 0.2s ease;
+        }
+        .btn-option:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .btn-option:active:not(:disabled) {
+            transform: translateY(0);
+        }
+        /* Smooth progress bar transition */
+        #progress-fill {
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-12">
+
+    <!-- Header & Progress Bar -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="bg-emerald-100 text-emerald-600 p-2 rounded-xl">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                    </div>
+                    <h1 class="text-2xl font-bold text-gray-800">Passato Prossimo: Essere o Avere?</h1>
+                </div>
+                <div class="w-full sm:w-48">
+                <div class="flex justify-between text-sm font-semibold text-gray-600 mb-1">
+                    <span>Progresso</span>
+                    <!-- Cambiar de 0 / 10 a 0 / 0 -->
+                    <span id="score-text">0 / 0</span> 
+                </div>
+                    <div class="h-3 w-full bg-gray-200 rounded-full overflow-hidden">
+                        <div id="progress-fill" class="h-full bg-emerald-500 w-0 rounded-full"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <a href="index.html" style="display:inline-block; margin-left: 400px; margin-top:10px; margin-bottom: 15px;background:#e8f6ee; color:#167344; padding:10px 16px; border-radius:9px; text-decoration:none; font-weight:bold;">
+        ⬅ Torna alla lezione di teoria
+        </a>
+
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8" id="app-container">
+        <!-- Generato via JavaScript -->
+    </main>
+
+    <script>
+        // Dati dell'applicazione
+        const quizData = [
+            {
+                id: "livello-1",
+                title: "Livello 1: Le Basi (Movimento e Azione)",
+                description: "Cominciamo con le regole principali. Ricorda: i verbi che rispondono a 'Che cosa?' vogliono AVERE. I verbi di movimento verso un luogo o di stato vogliono ESSERE.",
+                color: "blue",
+                questions: [
+                    {
+                        id: "q1",
+                        sentence: "Ieri sera Maria {blank} una pizza.",
+                        options: [
+                            { text: "ha mangiato", isCorrect: true, feedback: "Esatto! 'Mangiare' risponde alla domanda 'Che cosa?' (una pizza). C'è un oggetto diretto, quindi usiamo AVERE." },
+                            { text: "è mangiata", isCorrect: false, feedback: "Attenzione! 'Mangiare' ha un oggetto diretto (la pizza). Usiamo l'ausiliare AVERE." }
+                        ]
+                    },
+                    {
+                        id: "q2",
+                        sentence: "Noi {blank} al mare per il weekend.",
+                        options: [
+                            { text: "abbiamo andato", isCorrect: false, feedback: "Attenzione! 'Andare' indica un movimento verso un luogo (al mare). Serve il verbo ESSERE." },
+                            { text: "siamo andati", isCorrect: true, feedback: "Perfetto! 'Andare' è un verbo di movimento/direzione, quindi usa ESSERE e il participio si accorda (noi -> andati)." }
+                        ]
+                    },
+                    {
+                        id: "q3",
+                        sentence: "I bambini {blank} tutto il pomeriggio.",
+                        options: [
+                            { text: "hanno dormito", isCorrect: true, feedback: "Bravissima! 'Dormire' è un'attività stazionaria. Senza movimento o cambiamento di stato, la regola generale è usare AVERE." },
+                            { text: "sono dormiti", isCorrect: false, feedback: "Non è un verbo di movimento né di cambiamento di stato. Usa AVERE!" }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: "livello-2",
+                title: "Livello 2: La Sfida dell'Oggetto Diretto",
+                description: "Alcuni verbi cambiano! Se c'è un oggetto (Che cosa?) usiamo AVERE. Se non c'è, usiamo ESSERE. Fai attenzione al contesto!",
+                color: "purple",
+                questions: [
+                    {
+                        id: "q4",
+                        sentence: "Laura {blank} le scale velocemente.",
+                        options: [
+                            { text: "ha sceso", isCorrect: true, feedback: "Corretto! Che cosa ha sceso? 'Le scale' (oggetto diretto). Quindi usiamo AVERE." },
+                            { text: "è scesa", isCorrect: false, feedback: "Attenzione, qui ci sono 'le scale'. C'è un oggetto diretto! Prova con AVERE." }
+                        ]
+                    },
+                    {
+                        id: "q5",
+                        sentence: "Laura {blank} in cantina.",
+                        options: [
+                            { text: "ha sceso", isCorrect: false, feedback: "Qui 'in cantina' è una direzione, non un oggetto diretto. Usa il verbo di movimento!" },
+                            { text: "è scesa", isCorrect: true, feedback: "Esatto! Non c'è un oggetto, indica solo la direzione del movimento verso il basso. Usiamo ESSERE e accordiamo (scesa)." }
+                        ]
+                    },
+                    {
+                        id: "q6",
+                        sentence: "Io {blank} tutti i miei compiti.",
+                        options: [
+                            { text: "ho finito", isCorrect: true, feedback: "Perfetto! Che cosa ho finito? 'I compiti'. C'è l'oggetto, quindi ausiliare AVERE." },
+                            { text: "sono finito", isCorrect: false, feedback: "Ci sono 'i compiti' (oggetto diretto). Serve l'ausiliare AVERE." }
+                        ]
+                    },
+                    {
+                        id: "q7",
+                        sentence: "La lezione di italiano {blank} alle 10.",
+                        options: [
+                            { text: "ha finito", isCorrect: false, feedback: "La lezione non finisce 'qualcosa'. Finisce e basta (intransitivo). Usa ESSERE." },
+                            { text: "è finita", isCorrect: true, feedback: "Giusto! La lezione finisce da sola, non c'è un oggetto diretto. Usiamo ESSERE." }
+                        ]
+                    },
+                    {
+                        id: "q8",
+                        sentence: "Paola ed io {blank} un'avventura bellissima.",
+                        options: [
+                            { text: "siamo vissuti", isCorrect: false, feedback: "Guarda bene: 'un'avventura' è l'oggetto dell'esperienza vissuta. Serve AVERE." },
+                            { text: "abbiamo vissuto", isCorrect: true, feedback: "Bravissima! L'attenzione è sull'esperienza / oggetto (l'avventura). Si usa AVERE." }
+                        ]
+                    },
+                ]
+            },
+            {
+                id: "livello-3",
+                title: "Livello 3: Riconoscimento dei Pattern (Il Cuore della Pratica)",
+                description: "Osserva le coppie di frasi. Lo stesso verbo cambia significato e ausiliare in base al contesto!",
+                color: "amber",
+                specialBox: `
+                    <div class="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r-lg mb-6">
+                        <h4 class="font-bold text-amber-800 mb-2">🔍 Trova il Pattern</h4>
+                        <p class="text-amber-700 text-sm">
+                            Fai attenzione a <strong>cosa</strong> segue il verbo:<br>
+                            - C'è un oggetto diretto, una durata o un'esperienza vissuta? -> <strong>AVERE</strong>.<br>
+                            - C'è un movimento verso una destinazione precisa o si indica uno stato/residenza? -> <strong>ESSERE</strong>.
+                        </p>
+                    </div>
+                `,
+                questions: [
+
+                    // COPPIA 2: SALTARE
+                    {
+                        id: "q9",
+                        sentence: "Luca {blank} la corda in palestra.",
+                        options: [
+                            { text: "ha saltato", isCorrect: true, feedback: "Corretto! Che cosa ha saltato? 'La corda' (oggetto diretto dell'azione sportiva). AVERE." },
+                            { text: "è saltato", isCorrect: false, feedback: "C'è un oggetto diretto ('la corda'). Serve l'ausiliare AVERE." }
+                        ]
+                    },
+                    {
+                        id: "q10",
+                        sentence: "Francesca {blank} sulla moto.",
+                        options: [
+                            { text: "ha saltato", isCorrect: false, feedback: "Qui non si indica lo sport, ma un movimento verso un luogo (sulla moto). Usa ESSERE." },
+                            { text: "è saltata", isCorrect: true, feedback: "Perfetto! Il verbo indica un movimento fisico verso un luogo (direzione). Si usa ESSERE." }
+                        ]
+                    },
+                    // COPPIA 3: PASSARE
+                    {
+                        id: "q11",
+                        sentence: "Noi {blank} un bellissimo fine settimana.",
+                        options: [
+                            { text: "abbiamo passato", isCorrect: true, feedback: "Giusto! Si indica il 'trascorrere del tempo' e c'è l'oggetto ('un bellissimo fine settimana'). AVERE." },
+                            { text: "siamo passati", isCorrect: false, feedback: "Attenzione: c'è un oggetto diretto ('un fine settimana'). Devi usare AVERE." }
+                        ]
+                    },
+                    {
+                        id: "q12",
+                        sentence: "Noi {blank} davanti al Colosseo.",
+                        options: [
+                            { text: "abbiamo passato", isCorrect: false, feedback: "Non stiamo trascorrendo del tempo o un oggetto. Stiamo andando in una direzione." },
+                            { text: "siamo passati", isCorrect: true, feedback: "Esatto! Indica un movimento/transito attraverso un luogo. Si usa ESSERE." }
+                        ]
+                    },
+                    // COPPIA 4: CORRERE
+                    {
+                        id: "q13",
+                        sentence: "La ragazza {blank} per un'ora nel parco.",
+                        options: [
+                            { text: "ha corso", isCorrect: true, feedback: "Corretto! Si sottolinea l'azione sportiva in sé e la sua durata. Si usa AVERE." },
+                            { text: "è corsa", isCorrect: false, feedback: "Non c'è una destinazione (verso dove?), c'è solo l'attività fisica. Usa AVERE." }
+                        ]
+                    },
+                    {
+                        id: "q14",
+                        sentence: "La ragazza {blank} fuori dalla scuola per non fare tardi.",
+                        options: [
+                            { text: "ha corso", isCorrect: false, feedback: "Attenzione alla destinazione: 'fuori dalla scuola'. Indica un movimento per andare in un luogo." },
+                            { text: "è corsa", isCorrect: true, feedback: "Eccellente! C'è una destinazione ben precisa (fuori dalla scuola). Quando c'è la meta, usiamo ESSERE." }
+                        ]
+                    }
+                ]
+            }
+        ];
+
+        // Stato dell'applicazione
+        const state = {
+            answers: {}, // { q1: { selectedIdx: 0, isChecked: false, isCorrect: true } }
+            score: 0,
+            // Calcula el total automáticamente sumando las preguntas de cada nivel
+            totalQuestions: quizData.reduce((total, level) => total + level.questions.length, 0)
+        };
+
+        // Colori per i temi dei livelli
+        const themeColors = {
+            blue: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-800', badge: 'bg-blue-100 text-blue-700' },
+            purple: { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-800', badge: 'bg-purple-100 text-purple-700' },
+            amber: { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-900', badge: 'bg-amber-100 text-amber-700' }
+        };
+
+        // Funzione per aggiornare la barra del progresso
+        function updateProgress() {
+            let correctCount = 0;
+            for (const key in state.answers) {
+                if (state.answers[key].isChecked && state.answers[key].isCorrect) {
+                    correctCount++;
+                }
+            }
+            state.score = correctCount;
+            document.getElementById('score-text').innerText = `${state.score} / ${state.totalQuestions}`;
+            const percentage = (state.score / state.totalQuestions) * 100;
+            document.getElementById('progress-fill').style.width = `${percentage}%`;
+            
+            // Vittoria
+            if(state.score === state.totalQuestions) {
+                setTimeout(() => {
+                    alert("🎉 Bravissima! Hai completato tutti gli esercizi con successo!");
+                }, 500);
+            }
+        }
+
+        // Funzione per selezionare un'opzione
+        window.selectOption = function(qId, optIdx) {
+            if (state.answers[qId] && state.answers[qId].isChecked) return; // Già verificato
+
+            state.answers[qId] = {
+                ...state.answers[qId],
+                selectedIdx: optIdx
+            };
+            render();
+        }
+
+        // Funzione per verificare la risposta
+        window.checkAnswer = function(qId, qIdx, levelIdx) {
+            const answer = state.answers[qId];
+            if (!answer || answer.selectedIdx === undefined) return;
+
+            const questionData = quizData[levelIdx].questions[qIdx];
+            const selectedOption = questionData.options[answer.selectedIdx];
+
+            state.answers[qId].isChecked = true;
+            state.answers[qId].isCorrect = selectedOption.isCorrect;
+            
+            render();
+            updateProgress();
+        }
+
+        // Funzione principale di rendering
+        function render() {
+            const container = document.getElementById('app-container');
+            let html = '';
+
+            quizData.forEach((level, levelIdx) => {
+                const theme = themeColors[level.color];
+                
+                html += `
+                <div class="mb-10 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <!-- Intestazione Livello -->
+                    <div class="${theme.bg} px-6 py-5 border-b ${theme.border}">
+                        <h2 class="text-xl font-bold ${theme.text} mb-2">${level.title}</h2>
+                        <p class="text-gray-600 text-sm">${level.description}</p>
+                    </div>
+                    
+                    <div class="p-6">
+                        ${level.specialBox ? level.specialBox : ''}
+                        
+                        <div class="space-y-8">
+                `;
+
+                level.questions.forEach((q, qIdx) => {
+                    const ansState = state.answers[q.id] || {};
+                    const hasSelected = ansState.selectedIdx !== undefined;
+                    const isChecked = ansState.isChecked;
+                    
+                    // Sostituisce il blocco con il testo selezionato o un trattino
+                    let displaySentence = q.sentence;
+                    if (hasSelected) {
+                        const selText = q.options[ansState.selectedIdx].text;
+                        const colorClass = isChecked 
+                            ? (ansState.isCorrect ? 'text-emerald-600 border-emerald-500' : 'text-rose-500 border-rose-500') 
+                            : 'text-blue-600 border-blue-400';
+                        displaySentence = displaySentence.replace('{blank}', `<span class="font-bold border-b-2 ${colorClass} px-1">${selText}</span>`);
+                    } else {
+                        displaySentence = displaySentence.replace('{blank}', `<span class="text-gray-300 font-mono">__________</span>`);
+                    }
+
+                    html += `
+                        <div class="p-5 rounded-xl border border-gray-100 bg-gray-50/50 relative">
+                            <h3 class="text-lg font-medium text-gray-800 mb-4">${qIdx + 1}. ${displaySentence}</h3>
+                            
+                            <div class="flex flex-wrap gap-3 mb-4">
+                    `;
+
+                    // Bottoni Opzioni
+                    q.options.forEach((opt, optIdx) => {
+                        const isSelected = ansState.selectedIdx === optIdx;
+                        let btnClass = "bg-white border-2 border-gray-200 text-gray-600 hover:border-blue-400 hover:bg-blue-50";
+                        
+                        if (isSelected) {
+                            if (!isChecked) {
+                                btnClass = "bg-blue-100 border-2 border-blue-500 text-blue-700 font-semibold";
+                            } else {
+                                if (opt.isCorrect && ansState.isCorrect) {
+                                    btnClass = "bg-emerald-100 border-2 border-emerald-500 text-emerald-700 font-semibold";
+                                } else if (!opt.isCorrect && !ansState.isCorrect) {
+                                    btnClass = "bg-rose-100 border-2 border-rose-500 text-rose-700 font-semibold";
+                                }
+                            }
+                        } else if (isChecked && opt.isCorrect && !ansState.isCorrect) {
+                             // Mostra la risposta corretta se l'utente ha sbagliato
+                             btnClass = "bg-emerald-50 border-2 border-emerald-300 text-emerald-600 border-dashed";
+                        } else if (isChecked) {
+                            btnClass = "bg-gray-100 border-2 border-gray-200 text-gray-400 opacity-50 cursor-not-allowed";
+                        }
+
+                        html += `
+                            <button 
+                                onclick="selectOption('${q.id}', ${optIdx})"
+                                ${isChecked ? 'disabled' : ''}
+                                class="btn-option px-4 py-2 rounded-lg text-sm transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 ${btnClass}">
+                                ${opt.text}
+                            </button>
+                        `;
+                    });
+
+                    html += `</div>`; // Chiude i bottoni
+
+                    // Bottone Verifica o Feedback
+                    if (hasSelected && !isChecked) {
+                        html += `
+                            <button onclick="checkAnswer('${q.id}', ${qIdx}, ${levelIdx})" class="mt-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg shadow-sm transition-colors">
+                                Verifica Risposta
+                            </button>
+                        `;
+                    } else if (isChecked) {
+                        const selectedOpt = q.options[ansState.selectedIdx];
+                        const feedbackClass = ansState.isCorrect ? "bg-emerald-50 border-emerald-200 text-emerald-800" : "bg-rose-50 border-rose-200 text-rose-800";
+                        const icon = ansState.isCorrect ? "✅" : "💡";
+                        
+                        html += `
+                            <div class="mt-3 p-4 rounded-lg border ${feedbackClass} fade-in flex gap-3 items-start">
+                                <span class="text-xl">${icon}</span>
+                                <div>
+                                    <p class="text-sm leading-relaxed">${selectedOpt.feedback}</p>
+                                    ${!ansState.isCorrect ? `<button onclick="resetQuestion('${q.id}')" class="mt-2 text-xs font-bold underline hover:text-rose-600">Riprova</button>` : ''}
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    html += `</div>`; // Chiude il contenitore della domanda
+                });
+
+                html += `
+                        </div>
+                    </div>
+                </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+// Funzione per riprovare una domanda
+        window.resetQuestion = function(qId) {
+            delete state.answers[qId];
+            render();
+            updateProgress();
+        }
+
+        // Inizializzazione
+        render();
+        updateProgress(); // <-- ¡Añade esta línea aquí!
+
+    </script>
+</body>
+</html>
