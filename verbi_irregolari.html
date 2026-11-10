@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Flashcards: Verbi Irregolari</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f8fafc;
+            overscroll-behavior-y: none; /* Previene el pull-to-refresh en móviles */
+        }
+        
+        /* Utilidades para el efecto 3D de las Flashcards */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .transform-style-3d {
+            transform-style: preserve-3d;
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+        .card-flip-transition {
+            transition: transform 0.5s cubic-bezier(0.4, 0.2, 0.2, 1);
+        }
+        .is-flipped {
+            transform: rotateY(180deg);
+        }
+        
+        /* Ocultar scrollbar en los filtros de nivel */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden text-slate-800">
+
+    <!-- Encabezado -->
+    <header class="bg-white shadow-sm shrink-0 z-10">
+        <div class="px-4 py-3 flex justify-between items-center">
+            <a href="index.html" class="text-indigo-600 p-2 -ml-2 rounded-full hover:bg-indigo-50">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+                </svg>
+            </a>
+            <h1 class="text-lg font-bold text-slate-800">Verbi Irregolari</h1>
+            <button onclick="shuffleDeck()" class="text-slate-500 p-2 -mr-2 rounded-full hover:bg-slate-100" title="Mescolare">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Selector de Niveles (Scrollable en móvil) -->
+        <div class="flex overflow-x-auto no-scrollbar gap-2 px-4 pb-3 pt-1">
+            <button id="btn-lvl-0" onclick="setLevel(0)" class="shrink-0 px-4 py-1.5 rounded-full text-sm font-bold bg-indigo-600 text-white shadow-sm transition-colors">Essenziali</button>
+            <button id="btn-lvl-1" onclick="setLevel(1)" class="shrink-0 px-4 py-1.5 rounded-full text-sm font-bold bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors">Intermedi</button>
+            <button id="btn-lvl-2" onclick="setLevel(2)" class="shrink-0 px-4 py-1.5 rounded-full text-sm font-bold bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors">Avanzati</button>
+        </div>
+    </header>
+
+    <!-- Área Principal de la Tarjeta -->
+    <main class="flex-1 flex flex-col items-center justify-center p-6 relative" id="touch-area">
+        
+        <!-- Progreso -->
+        <div class="absolute top-4 left-0 w-full px-6 flex justify-between items-center text-sm font-bold text-slate-400">
+            <span id="card-counter">1 / 30</span>
+            <span id="level-name" class="text-indigo-400 uppercase tracking-widest text-xs">Essenziali</span>
+        </div>
+
+        <!-- Contenedor Flashcard -->
+        <div class="perspective-1000 w-full max-w-sm aspect-[4/5] sm:aspect-square cursor-pointer" onclick="flipCard()">
+            <div id="flashcard" class="card-flip-transition transform-style-3d w-full h-full relative rounded-3xl shadow-xl">
+                
+                <!-- Frente (Infinito) -->
+                <div class="absolute w-full h-full backface-hidden bg-white border-2 border-slate-100 rounded-3xl flex flex-col items-center justify-center p-6">
+                    <span class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">Infinito</span>
+                    <h2 id="verb-front" class="text-4xl sm:text-5xl font-extrabold text-slate-800 text-center break-words w-full">Aprire</h2>
+                    <p class="absolute bottom-6 text-slate-300 text-sm font-semibold">Tocca per girare</p>
+                </div>
+
+                <!-- Dorso (Participio) -->
+                <div class="absolute w-full h-full backface-hidden rotate-y-180 bg-indigo-600 rounded-3xl shadow-indigo-200/50 flex flex-col items-center justify-center p-6">
+                    <span class="text-xs font-bold uppercase tracking-widest text-indigo-300 mb-4">Participio Passato</span>
+                    <h2 id="verb-back" class="text-4xl sm:text-5xl font-extrabold text-white text-center break-words w-full">Aperto</h2>
+                    
+                    <!-- Indicador visual de los sufijos comunes -->
+                    <div id="pattern-hint" class="absolute bottom-8 px-4 py-2 bg-indigo-700/50 rounded-xl text-indigo-100 text-sm font-semibold hidden">
+                        Termina in <span id="pattern-suffix" class="text-white font-bold">-to</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Controles Inferiores -->
+    <footer class="bg-white shrink-0 pb-safe">
+        <div class="px-6 py-4 flex justify-between items-center max-w-sm mx-auto w-full gap-4">
+            <button onclick="prevCard()" class="flex-1 py-4 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-600 rounded-2xl font-bold text-lg transition-colors flex justify-center items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+                </svg>
+            </button>
+            <button onclick="nextCard()" class="flex-[2] py-4 bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-white rounded-2xl font-bold text-lg shadow-lg shadow-emerald-200 transition-colors">
+                Prossimo
+            </button>
+        </div>
+    </footer>
+
+    <script>
+        const rawVerbs = [
+            // BLOCCO 1: Essenziali (0)
+            { inf: "Accendere", part: "acceso", cat: 0 }, { inf: "Aprire", part: "aperto", cat: 0 }, { inf: "Bere", part: "bevuto", cat: 0 }, { inf: "Chiedere", part: "chiesto", cat: 0 }, { inf: "Chiudere", part: "chiuso", cat: 0 }, { inf: "Correre", part: "corso", cat: 0 }, { inf: "Decidere", part: "deciso", cat: 0 }, { inf: "Dire", part: "detto", cat: 0 }, { inf: "Fare", part: "fatto", cat: 0 }, { inf: "Leggere", part: "letto", cat: 0 }, { inf: "Mettere", part: "messo", cat: 0 }, { inf: "Morire", part: "morto", cat: 0 }, { inf: "Nascere", part: "nato", cat: 0 }, { inf: "Offrire", part: "offerto", cat: 0 }, { inf: "Piacere", part: "piaciuto", cat: 0 }, { inf: "Prendere", part: "preso", cat: 0 }, { inf: "Ridere", part: "riso", cat: 0 }, { inf: "Rimanere", part: "rimasto", cat: 0 }, { inf: "Rispondere", part: "risposto", cat: 0 }, { inf: "Rompere", part: "rotto", cat: 0 }, { inf: "Scegliere", part: "scelto", cat: 0 }, { inf: "Scendere", part: "sceso", cat: 0 }, { inf: "Scrivere", part: "scritto", cat: 0 }, { inf: "Spegnere", part: "spento", cat: 0 }, { inf: "Spendere", part: "speso", cat: 0 }, { inf: "Vedere", part: "visto", cat: 0 }, { inf: "Venire", part: "venuto", cat: 0 }, { inf: "Vincere", part: "vinto", cat: 0 }, { inf: "Vivere", part: "vissuto", cat: 0 }, { inf: "Dare", part: "dato", cat: 0 },
+            // BLOCCO 2: Intermedi (1)
+            { inf: "Attendere", part: "atteso", cat: 1 }, { inf: "Cogliere", part: "colto", cat: 1 }, { inf: "Correggere", part: "corretto", cat: 1 }, { inf: "Cuocere", part: "cotto", cat: 1 }, { inf: "Difendere", part: "difeso", cat: 1 }, { inf: "Dipingere", part: "dipinto", cat: 1 }, { inf: "Dividere", part: "diviso", cat: 1 }, { inf: "Friggere", part: "fritto", cat: 1 }, { inf: "Giungere", part: "giunto", cat: 1 }, { inf: "Aggiungere", part: "aggiunto", cat: 1 }, { inf: "Mordere", part: "morso", cat: 1 }, { inf: "Muovere", part: "mosso", cat: 1 }, { inf: "Nascondere", part: "nascosto", cat: 1 }, { inf: "Offendere", part: "offeso", cat: 1 }, { inf: "Piangere", part: "pianto", cat: 1 }, { inf: "Porre", part: "posto", cat: 1 }, { inf: "Rendere", part: "reso", cat: 1 }, { inf: "Risolvere", part: "risolto", cat: 1 }, { inf: "Spingere", part: "spinto", cat: 1 }, { inf: "Stringere", part: "stretto", cat: 1 }, { inf: "Togliere", part: "tolto", cat: 1 }, { inf: "Tradurre", part: "tradotto", cat: 1 }, { inf: "Uccidere", part: "ucciso", cat: 1 }, { inf: "Torcere", part: "torto", cat: 1 }, { inf: "Succedere", part: "succeso", cat: 1 }, { inf: "Conoscere", part: "conosciuto", cat: 1 }, { inf: "Discutere", part: "discusso", cat: 1 }, { inf: "Esistere", part: "esistito", cat: 1 }, { inf: "Proteggere", part: "protetto", cat: 1 }, { inf: "Distruggere", part: "distrutto", cat: 1 },
+            // BLOCCO 3: Avanzati (2)
+            { inf: "Porgere", part: "porto", cat: 2 }, { inf: "Pungere", part: "punto", cat: 2 }, { inf: "Tingere", part: "tinto", cat: 2 }, { inf: "Affliggere", part: "afflitto", cat: 2 }, { inf: "Apparire", part: "apparso", cat: 2 }, { inf: "Ardere", part: "arso", cat: 2 }, { inf: "Attingere", part: "attinto", cat: 2 }, { inf: "Comprimere", part: "compresso", cat: 2 }, { inf: "Eccellere", part: "eccelso", cat: 2 }, { inf: "Evolvere", part: "evoluto", cat: 2 }, { inf: "Flettere", part: "flesso", cat: 2 }, { inf: "Fungere", part: "funto", cat: 2 }, { inf: "Invadere", part: "invaso", cat: 2 }, { inf: "Mungere", part: "munto", cat: 2 }, { inf: "Parere", part: "parso", cat: 2 }, { inf: "Radere", part: "raso", cat: 2 }, { inf: "Tendere", part: "teso", cat: 2 }, { inf: "Udire", part: "udito", cat: 2 }, { inf: "Valere", part: "valso", cat: 2 }, { inf: "Volgere", part: "volto", cat: 2 }, { inf: "Accludere", part: "accluso", cat: 2 }, { inf: "Alludere", part: "alluso", cat: 2 }, { inf: "Appendere", part: "appeso", cat: 2 }, { inf: "Assolvere", part: "assolto", cat: 2 }, { inf: "Cingere", part: "cinto", cat: 2 }, { inf: "Concedere", part: "concesso", cat: 2 }, { inf: "Distinguere", part: "distinto", cat: 2 }, { inf: "Dolere", part: "doluto", cat: 2 }, { inf: "Fondere", part: "fuso", cat: 2 }, { inf: "Nuocere", part: "nuociuto", cat: 2 }, { inf: "Sciogliere", part: "sciolto", cat: 2 }, { inf: "Tacere", part: "taciuto", cat: 2 }, { inf: "Trarre", part: "tratto", cat: 2 }, { inf: "Accorgere", part: "accorto", cat: 2 }, { inf: "Dirigere", part: "diretto", cat: 2 }
+        ];
+
+        const levelNames = ["Essenziali", "Intermedi", "Avanzati"];
+        let currentDeck = [];
+        let currentIndex = 0;
+        let isFlipped = false;
+
+        const flashcardEl = document.getElementById('flashcard');
+        const verbFrontEl = document.getElementById('verb-front');
+        const verbBackEl = document.getElementById('verb-back');
+        const counterEl = document.getElementById('card-counter');
+        const levelNameEl = document.getElementById('level-name');
+        const patternHintEl = document.getElementById('pattern-hint');
+        const patternSuffixEl = document.getElementById('pattern-suffix');
+
+        function setLevel(lvl) {
+            // Actualizar botones UI
+            [0, 1, 2].forEach(i => {
+                const btn = document.getElementById(`btn-lvl-${i}`);
+                if (i === lvl) {
+                    btn.className = "shrink-0 px-4 py-1.5 rounded-full text-sm font-bold bg-indigo-600 text-white shadow-sm transition-colors";
+                } else {
+                    btn.className = "shrink-0 px-4 py-1.5 rounded-full text-sm font-bold bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors";
+                }
+            });
+
+            levelNameEl.textContent = levelNames[lvl];
+            currentDeck = rawVerbs.filter(v => v.cat === lvl);
+            currentIndex = 0;
+            
+            updateCard(true);
+        }
+
+        function shuffleDeck() {
+            // Algoritmo de Fisher-Yates
+            for (let i = currentDeck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [currentDeck[i], currentDeck[j]] = [currentDeck[j], currentDeck[i]];
+            }
+            currentIndex = 0;
+            updateCard(true);
+        }
+
+        function updateCard(forceUnflip = false) {
+            if (currentDeck.length === 0) return;
+            
+            const currentVerb = currentDeck[currentIndex];
+            counterEl.textContent = `${currentIndex + 1} / ${currentDeck.length}`;
+
+            // Si está volteada, primero ocultamos y luego cambiamos el texto
+            if (isFlipped || forceUnflip) {
+                flashcardEl.classList.remove('is-flipped');
+                isFlipped = false;
+                
+                // Esperar a que termine la animación para cambiar el texto frontal
+                setTimeout(() => {
+                    populateContent(currentVerb);
+                }, 250); // Mitad del tiempo de transición
+            } else {
+                populateContent(currentVerb);
+            }
+        }
+
+        function populateContent(verbObj) {
+            verbFrontEl.textContent = verbObj.inf;
+            verbBackEl.textContent = verbObj.part;
+
+            // Mostrar sufijos comunes para ayudar a memorizar
+            const part = verbObj.part.toLowerCase();
+            patternHintEl.classList.add('hidden');
+            if (part.endsWith('tto')) {
+                patternSuffixEl.textContent = '-tto';
+                patternHintEl.classList.remove('hidden');
+            } else if (part.endsWith('sto')) {
+                patternSuffixEl.textContent = '-sto';
+                patternHintEl.classList.remove('hidden');
+            } else if (part.endsWith('so')) {
+                patternSuffixEl.textContent = '-so';
+                patternHintEl.classList.remove('hidden');
+            }
+        }
+
+        function flipCard() {
+            isFlipped = !isFlipped;
+            flashcardEl.classList.toggle('is-flipped');
+        }
+
+        function nextCard() {
+            if (currentIndex < currentDeck.length - 1) {
+                currentIndex++;
+                updateCard();
+            } else {
+                // Reiniciar si llegó al final
+                currentIndex = 0;
+                updateCard();
+            }
+        }
+
+        function prevCard() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateCard();
+            }
+        }
+
+        // --- Lógica de Swipe (Pantallas táctiles) ---
+        let touchStartX = 0;
+        let touchEndX = 0;
+        const touchArea = document.getElementById('touch-area');
+
+        touchArea.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, {passive: true});
+
+        touchArea.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, {passive: true});
+
+        function handleSwipe() {
+            const threshold = 50; // Distancia mínima para considerar swipe
+            if (touchStartX - touchEndX > threshold) {
+                nextCard(); // Swipe a la izquierda
+            }
+            if (touchEndX - touchStartX > threshold) {
+                prevCard(); // Swipe a la derecha
+            }
+        }
+
+        // Iniciar con nivel 0
+        setLevel(0);
+
+    </script>
+</body>
+</html>
